@@ -1,6 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Optional
 
 # ----------------------------
 # Configuration
@@ -58,8 +58,8 @@ def get_regime(t: int) -> int:
 # Data generation
 # ----------------------------
 
-def generate_sample(t: int) -> Dict:
-    regime = get_regime(t)
+def generate_sample(t: int, regime_id: Optional[int] = None) -> Dict:
+    regime = regime_id if regime_id is not None else get_regime(t)
 
     # Base features (model sees these)
     x = np.random.randn(N_FEATURES)
