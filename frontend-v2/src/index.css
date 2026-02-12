@@ -1,16 +1,37 @@
-:root {
+/* ─── Theme Variables ─── */
+:root,
+[data-theme="dark"] {
     --bg-dark: #0a0c10;
+    --bg-secondary: #12151c;
     --card-bg: rgba(255, 255, 255, 0.03);
     --border: rgba(255, 255, 255, 0.08);
     --accent-primary: #00f2ff;
     --accent-secondary: #7000ff;
     --accent-tertiary: #ff00c8;
+    --accent-warning: #ff9500;
+    --accent-danger: #ff3b5c;
+    --accent-success: #00e676;
     --text-main: #e0e0e0;
     --text-muted: #a0a0a0;
     --glass: rgba(255, 255, 255, 0.02);
     --gradient: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+    --modal-bg: rgba(0, 0, 0, 0.85);
+    --toast-bg: rgba(10, 12, 16, 0.95);
 }
 
+[data-theme="light"] {
+    --bg-dark: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --card-bg: rgba(0, 0, 0, 0.02);
+    --border: rgba(0, 0, 0, 0.08);
+    --text-main: #1a1a2e;
+    --text-muted: #6b7280;
+    --glass: rgba(255, 255, 255, 0.7);
+    --modal-bg: rgba(255, 255, 255, 0.9);
+    --toast-bg: rgba(255, 255, 255, 0.95);
+}
+
+/* ─── Reset & Base ─── */
 * {
     margin: 0;
     padding: 0;
@@ -25,8 +46,10 @@ body {
     scroll-behavior: smooth;
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.4s ease, color 0.4s ease;
 }
 
+/* ─── Background Glow ─── */
 .background-glow {
     position: fixed;
     top: 0;
@@ -38,8 +61,14 @@ body {
         radial-gradient(circle at 80% 80%, rgba(112, 0, 255, 0.05) 0%, transparent 40%);
     z-index: -1;
     pointer-events: none;
+    transition: opacity 0.4s ease;
 }
 
+[data-theme="light"] .background-glow {
+    opacity: 0.3;
+}
+
+/* ─── Typography ─── */
 .gradient-text {
     background: var(--gradient);
     -webkit-background-clip: text;
@@ -48,27 +77,28 @@ body {
     font-weight: 800;
 }
 
-/* Layout */
+/* ─── Layout ─── */
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
 }
 
-/* Glass Card */
+/* ─── Glass Card ─── */
 .glass {
     background: var(--glass);
     border: 1px solid var(--border);
     border-radius: 24px;
     backdrop-filter: blur(10px);
+    transition: background 0.4s ease, border-color 0.4s ease;
 }
 
-/* Section Spacing */
+/* ─── Section Spacing ─── */
 section {
-    padding: 8rem 0;
+    padding: 6rem 0;
 }
 
-/* Progress Bar */
+/* ─── Progress Bar ─── */
 .progress-bar {
     width: 100%;
     height: 6px;
@@ -77,8 +107,284 @@ section {
     overflow: hidden;
 }
 
+[data-theme="light"] .progress-bar {
+    background: rgba(0, 0, 0, 0.06);
+}
+
 .progress-fill {
     height: 100%;
     background: var(--gradient);
     border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* ─── Skeleton Loaders (Feature 11) ─── */
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg,
+            rgba(255, 255, 255, 0.03) 25%,
+            rgba(255, 255, 255, 0.08) 50%,
+            rgba(255, 255, 255, 0.03) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 8px;
+}
+
+[data-theme="light"] .skeleton {
+    background: linear-gradient(90deg,
+            rgba(0, 0, 0, 0.04) 25%,
+            rgba(0, 0, 0, 0.08) 50%,
+            rgba(0, 0, 0, 0.04) 75%);
+    background-size: 200% 100%;
+}
+
+.skeleton-text {
+    height: 1.2rem;
+    width: 60%;
+    margin-bottom: 0.5rem;
+}
+
+.skeleton-value {
+    height: 2.5rem;
+    width: 80%;
+}
+
+.skeleton-chart {
+    height: 300px;
+    width: 100%;
+}
+
+/* ─── Toast Notifications (Feature 3) ─── */
+.toast-container {
+    position: fixed;
+    top: 5rem;
+    right: 2rem;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.toast {
+    background: var(--toast-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-warning);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    backdrop-filter: blur(20px);
+    animation: toastSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 380px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.toast.toast-danger {
+    border-left-color: var(--accent-danger);
+}
+
+.toast.toast-success {
+    border-left-color: var(--accent-success);
+}
+
+.toast-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 0.3rem;
+    color: var(--accent-warning);
+}
+
+.toast-danger .toast-title {
+    color: var(--accent-danger);
+}
+
+.toast-success .toast-title {
+    color: var(--accent-success);
+}
+
+.toast-message {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+@keyframes toastSlideIn {
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.toast-exit {
+    animation: toastSlideOut 0.3s ease forwards;
+}
+
+@keyframes toastSlideOut {
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+}
+
+/* ─── Modal (Feature 2) ─── */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--modal-bg);
+    backdrop-filter: blur(12px);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 4rem;
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+    animation: scaleIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+}
+
+.modal-content p {
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+}
+
+/* Loader Spinner */
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 2rem;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.modal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 2rem;
+    text-align: left;
+}
+
+.modal-stat {
+    padding: 1rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.modal-stat .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.modal-stat .stat-val {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+/* ─── Theme Toggle ─── */
+.theme-toggle {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    color: var(--text-main);
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent-primary);
+    transform: rotate(20deg);
+}
+
+/* ─── Responsive (Feature 10) ─── */
+@media (max-width: 1024px) {
+    .container {
+        padding: 0 1.5rem;
+    }
+
+    section {
+        padding: 4rem 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 1rem;
+    }
+
+    section {
+        padding: 3rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0 0.75rem;
+    }
 }

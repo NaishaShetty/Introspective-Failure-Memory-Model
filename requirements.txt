@@ -1,4 +1,6 @@
 scikit-learn
 matplotlib
+numpy
 fastapi
 uvicorn
+websockets
