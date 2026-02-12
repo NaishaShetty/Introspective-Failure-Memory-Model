@@ -1,3 +1,0 @@
-py -m pip install scikit-learn
-
-py -m pip install matplotlib
