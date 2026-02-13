@@ -5,3 +5,4 @@ fastapi
 uvicorn
 websockets
 pandas
+python-multipart
