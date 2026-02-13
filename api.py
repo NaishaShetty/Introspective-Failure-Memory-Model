@@ -50,7 +50,7 @@ class GlobalState:
 state = GlobalState()
 
 # ─── Initialization Logic ───
-def initialize_system(n_samples=10000):
+def initialize_system(n_samples=3000): # Reduced for Render speed
     print(f"[IFM] Initializing with {n_samples} samples...")
     data = generate_dataset(n_samples)
     X, y, C = data["X"], data["y"], data["context"]
@@ -61,7 +61,7 @@ def initialize_system(n_samples=10000):
     C_train, C_val = C[:split], C[split:]
     
     # 1. Primary Model
-    state.primary_model = LogisticRegression(max_iter=1000)
+    state.primary_model = LogisticRegression(max_iter=500)
     state.primary_model.fit(X_train, y_train)
     
     # 2. Embeddings
@@ -76,37 +76,37 @@ def initialize_system(n_samples=10000):
     
     fail_idx = np.where((err_train == 1) & (conf_train >= state.conf_threshold))[0]
     
-    # Store initial failures for immediate export/viewing
-    for i in fail_idx[:100]:  # Cap at 100 for startup speed
-        emb = state.embedder.embed(X_train[i], probs_train[i])
-        state.failures.append({
-            "t": -int(i), # Initial training failures denoted with negative T
-            "x": X_train[i].tolist(),
-            "embedding": emb.tolist(),
-            "conf": float(conf_train[i]),
-            "cluster": 0, # Temporarily 0, will be updated after fit
-            "regime": 0   # Background regime
-        })
+    if len(fail_idx) > 0:
+        # Pre-compute embeddings for all failures (MUCH FASTER)
+        all_fail_embs = np.vstack([state.embedder.embed(X_train[i], probs_train[i]) for i in fail_idx])
+        
+        state.memory = FailureMemory(n_clusters=3)
+        state.memory.fit(all_fail_embs)
+        state.centroids = state.memory.kmeans.cluster_centers_
+        
+        fail_cids = state.memory.kmeans.predict(all_fail_embs)
 
-    fail_embeddings = np.vstack([state.embedder.embed(X_train[i], probs_train[i]) for i in fail_idx])
-    
-    state.memory = FailureMemory(n_clusters=3)
-    state.memory.fit(fail_embeddings)
-    state.centroids = state.memory.kmeans.cluster_centers_
-
-    # Update cluster IDs for initial failures
-    for f in state.failures:
-        f["cluster"] = int(state.memory.kmeans.predict(np.array(f["embedding"]).reshape(1,-1))[0])
-    
-    # 4. Specialists (Feature 3)
-    for k in range(3):
-        idx_k = [i for i in fail_idx if state.memory.kmeans.predict(state.embedder.embed(X_train[i], probs_train[i]).reshape(1,-1))[0] == k]
-        if len(idx_k) > 20:
-            Zk = np.hstack([C_train[idx_k], np.vstack([state.embedder.embed(X_train[i], probs_train[i]) for i in idx_k])])
-            yk = (y_train[idx_k] != preds_train[idx_k]).astype(int)
-            spec_model = LogisticRegression(max_iter=1000, class_weight="balanced")
-            spec_model.fit(Zk, yk)
-            state.specialists[k] = spec_model
+        # Store initial artifacts for UI
+        for i, idx_in_train in enumerate(fail_idx[:50]):
+            state.failures.append({
+                "t": -int(idx_in_train),
+                "x": X_train[idx_in_train].tolist(),
+                "embedding": all_fail_embs[i].tolist(),
+                "conf": float(conf_train[idx_in_train]),
+                "cluster": int(fail_cids[i]),
+                "regime": 0
+            })
+        
+        # 4. Specialists (Feature 3)
+        for k in range(3):
+            k_mask = (fail_cids == k)
+            if np.sum(k_mask) > 15:
+                real_idx = fail_idx[k_mask]
+                Zk = np.hstack([C_train[real_idx], all_fail_embs[k_mask]])
+                yk = (y_train[real_idx] != preds_train[real_idx]).astype(int)
+                spec_model = LogisticRegression(max_iter=500, class_weight="balanced")
+                spec_model.fit(Zk, yk)
+                state.specialists[k] = spec_model
 
 initialize_system()
 
