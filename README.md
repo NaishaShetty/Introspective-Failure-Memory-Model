@@ -11,6 +11,9 @@ Models should remember their failures, detect when they are entering similar fai
 
 Rather than correcting individual mistakes, we focus on failure recognition and regime-aware decision making.
 
+# Live Demo Url:
+- https://introspective-failure-memory-model1.onrender.com/
+
 # Core Idea
 
 Failures are not pointwise random events.
